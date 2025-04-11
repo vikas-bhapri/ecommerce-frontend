@@ -5,7 +5,7 @@ import React from "react";
 const SignInPage = () => {
   return (
     <div className="w-1/2 min-w-[20rem] flex flex-col ">
-      <h1 className="text-xl my-5 text-center">Create an Account!</h1>
+      <h1 className="text-xl my-5 text-center">Log in to shop with us!</h1>
       <AuthForm method="signIn" />
       <p className="text-sm text-gray-500 my-4">
         Don&apos;t have an account?{" "}

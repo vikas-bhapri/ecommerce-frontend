@@ -118,6 +118,7 @@ const AuthForm = ({ method }: { method: formType }) => {
   const [errorMessages, setErrorMessages] = useState<Record<string, string>>(
     {}
   );
+  const [submitting, setSubmitting] = useState(false);
 
   const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
   const router = useRouter();
@@ -134,79 +135,89 @@ const AuthForm = ({ method }: { method: formType }) => {
       addressLine2: "",
       city: "",
       state: "",
-      zip: undefined,
+      zip: "",
       country: "",
       countryCode: "",
-      phone: undefined,
+      phone: "",
     },
   });
 
   const signIn = async (data: z.infer<typeof formSchema>) => {
-    const url = `${backendURL}/auth/login`;
-    console.log(backendURL);
-    const payload = new URLSearchParams();
-    payload.append("username", data.username);
-    payload.append("password", data.password);
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: payload,
-    });
+    setSubmitting(true);
+    try {
+      const payload = new URLSearchParams();
+      payload.append("username", data.username);
+      payload.append("password", data.password);
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      const errorDetail = errorData.detail.detail;
-      setErrorMessage(errorDetail);
-      return;
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        body: payload,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(result.message);
+        return;
+      }
+
+      // Success: redirect to homepage
+      router.push("/");
+    } catch (error) {
+      console.error("Error during sign-in:", error);
+      setErrorMessage("An error occurred. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
-    const result = await response.json();
-    console.log("Sign In Success", result);
-
-    localStorage.setItem("token", result.access_token);
-    router.push("/");
   };
 
   const signUp = async (data: z.infer<typeof formSchema>) => {
-    const url = `${backendURL}/auth/user`;
-    const payload = {
-      username: data.username,
-      email: data.email,
-      first_name: data.firstName,
-      last_name: data.lastName,
-      password: data.password,
-      confirm_password: data.confirmPassword,
-      address_line_1: data.addressLine1,
-      address_line_2: data.addressLine2,
-      city: data.city,
-      state: data.state,
-      zip_code: data.zip,
-      role: "user",
-      country: data.country,
-      country_code: data.countryCode,
-      phone: data.phone,
-    };
+    setSubmitting(true);
+    try {
+      const url = `${backendURL}/auth/user`;
+      const payload = {
+        username: data.username,
+        email: data.email,
+        first_name: data.firstName,
+        last_name: data.lastName,
+        password: data.password,
+        confirm_password: data.confirmPassword,
+        address_line_1: data.addressLine1,
+        address_line_2: data.addressLine2,
+        city: data.city,
+        state: data.state,
+        zip_code: data.zip,
+        role: "user",
+        country: data.country,
+        country_code: data.countryCode,
+        phone: data.phone,
+      };
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      if (errorData.detail && errorData.detail.detail) {
-        const fieldErrors = errorData.detail.detail;
-        setErrorMessages(fieldErrors); // Store field-specific errors
-        return;
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.detail && errorData.detail.detail) {
+          const fieldErrors = errorData.detail.detail;
+          setErrorMessages(fieldErrors || "An unknown error occurred");
+          return;
+        }
+        throw new Error("An unknown error occurred.");
       }
-      throw new Error("An unknown error occurred.");
-    }
 
-    router.push("/sign-in");
+      router.push("/sign-in");
+    } catch (error) {
+      console.error("Error during sign-up:", error);
+      setErrorMessages({ general: "An error occurred. Please try again." });
+    } finally {
+      setSubmitting(false); // Ensure this is always called
+    }
   };
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
@@ -224,7 +235,9 @@ const AuthForm = ({ method }: { method: formType }) => {
   return (
     <>
       {errorMessage && (
-        <p className="text-red-500 text-sm mb-4">{errorMessage}</p>
+        <p className="text-red-500 text-center text-md font-semibold mb-4">
+          {errorMessage}
+        </p>
       )}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -237,7 +250,11 @@ const AuthForm = ({ method }: { method: formType }) => {
                 <FormControl>
                   <Input placeholder="Username" {...field} />
                 </FormControl>
-                <FormMessage />
+                <FormMessage>
+                  {errorMessages.username && (
+                    <span>{errorMessages.username}</span>
+                  )}
+                </FormMessage>
               </FormItem>
             )}
           />
@@ -251,7 +268,9 @@ const AuthForm = ({ method }: { method: formType }) => {
                   <FormControl>
                     <Input placeholder="Email" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage>
+                    {errorMessages.email && <span>{errorMessages.email}</span>}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -287,7 +306,7 @@ const AuthForm = ({ method }: { method: formType }) => {
                       </FormControl>
                       <FormMessage>
                         {errorMessages.first_name && (
-                          <span>{errorMessages.first_name}</span>
+                          <span>{errorMessages.last_name}</span>
                         )}
                       </FormMessage>
                     </FormItem>
@@ -306,7 +325,11 @@ const AuthForm = ({ method }: { method: formType }) => {
                   <FormControl>
                     <Input type="password" placeholder="Password" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage>
+                    {errorMessages.password && (
+                      <span>{errorMessages.password}</span>
+                    )}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -324,7 +347,11 @@ const AuthForm = ({ method }: { method: formType }) => {
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage>
+                      {errorMessages.confirm_password && (
+                        <span>{errorMessages.confirm_password}</span>
+                      )}
+                    </FormMessage>
                   </FormItem>
                 )}
               />
@@ -341,7 +368,11 @@ const AuthForm = ({ method }: { method: formType }) => {
                     <FormControl>
                       <Input placeholder="Address Line 1" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage>
+                      {errorMessages.address_line_1 && (
+                        <span>{errorMessages.address_line_1}</span>
+                      )}
+                    </FormMessage>
                   </FormItem>
                 )}
               />
@@ -354,7 +385,11 @@ const AuthForm = ({ method }: { method: formType }) => {
                     <FormControl>
                       <Input placeholder="Address Line 2" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage>
+                      {errorMessages.address_line_2 && (
+                        <span>{errorMessages.address_line_2}</span>
+                      )}
+                    </FormMessage>
                   </FormItem>
                 )}
               />
@@ -368,7 +403,11 @@ const AuthForm = ({ method }: { method: formType }) => {
                       <FormControl>
                         <Input placeholder="City" {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage>
+                        {errorMessages.city && (
+                          <span>{errorMessages.city}</span>
+                        )}
+                      </FormMessage>
                     </FormItem>
                   )}
                 />
@@ -381,7 +420,11 @@ const AuthForm = ({ method }: { method: formType }) => {
                       <FormControl>
                         <Input placeholder="State" {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage>
+                        {errorMessages.state && (
+                          <span>{errorMessages.state}</span>
+                        )}
+                      </FormMessage>
                     </FormItem>
                   )}
                 />
@@ -396,7 +439,11 @@ const AuthForm = ({ method }: { method: formType }) => {
                       <FormControl>
                         <Input type="number" placeholder="ZIP" {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage>
+                        {errorMessages.zip_code && (
+                          <span>{errorMessages.zip_code}</span>
+                        )}
+                      </FormMessage>
                     </FormItem>
                   )}
                 />
@@ -409,7 +456,11 @@ const AuthForm = ({ method }: { method: formType }) => {
                       <FormControl>
                         <Input placeholder="Country" {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage>
+                        {errorMessages.country && (
+                          <span>{errorMessages.country}</span>
+                        )}
+                      </FormMessage>
                     </FormItem>
                   )}
                 />
@@ -424,7 +475,11 @@ const AuthForm = ({ method }: { method: formType }) => {
                       <FormControl>
                         <Input placeholder="Country Code" {...field} />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage>
+                        {errorMessages.country_code && (
+                          <span>{errorMessages.country_code}</span>
+                        )}
+                      </FormMessage>
                     </FormItem>
                   )}
                 />
@@ -441,7 +496,11 @@ const AuthForm = ({ method }: { method: formType }) => {
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage>
+                        {errorMessages.phone && (
+                          <span>{errorMessages.phone}</span>
+                        )}
+                      </FormMessage>
                     </FormItem>
                   )}
                 />
@@ -450,9 +509,14 @@ const AuthForm = ({ method }: { method: formType }) => {
           )}
           <Button
             type="submit"
-            className="w-full bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-300"
+            className="w-full bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-300 disabled:bg-gray-600"
+            disabled={submitting}
           >
-            {method === "signIn" ? "Sign In" : "Sign Up"}
+            {submitting
+              ? "Submitting..."
+              : method === "signIn"
+              ? "Sign In"
+              : "Sign Up"}
           </Button>
         </form>
       </Form>
