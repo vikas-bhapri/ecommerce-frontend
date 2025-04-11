@@ -1,11 +1,10 @@
 name: E-Commerce Frontend CI/CD
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
+    types:
+      - closed
   workflow_dispatch:
 
 jobs:
@@ -24,5 +23,5 @@ jobs:
 
       - name: Build and Push Docker image
         run: |
-          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/ecommerce_frontend:${{ github.sha }} .
+          docker build --build-arg NEXT_PUBLIC_BACKEND_URL=${{ secrets.BACKEND_URL }} -t ${{ secrets.ACR_LOGIN_SERVER }}/ecommerce_frontend:${{ github.sha }} .
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/ecommerce_frontend:${{ github.sha }}

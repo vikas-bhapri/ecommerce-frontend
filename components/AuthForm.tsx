@@ -143,6 +143,7 @@ const AuthForm = ({ method }: { method: formType }) => {
 
   const signIn = async (data: z.infer<typeof formSchema>) => {
     const url = `${backendURL}/auth/login`;
+    console.log(backendURL);
     const payload = new URLSearchParams();
     payload.append("username", data.username);
     payload.append("password", data.password);

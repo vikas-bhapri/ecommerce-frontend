@@ -11,6 +11,9 @@ RUN npm ci
 # Copy the rest of the app source code
 COPY . .
 
+ARG NEXT_PUBLIC_BACKEND_URL
+ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL
+
 # Build the Next.js app
 RUN npm run build
 
