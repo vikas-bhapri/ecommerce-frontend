@@ -3,21 +3,20 @@ import { NextResponse, NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
   const isLoggedIn = !!token;
-  const isLoginPage = request.nextUrl.pathname === "/sign-in";
-  const isSignUpPage = request.nextUrl.pathname === "/sign-up";
+  const isPublicPage = ["/sign-in", "/sign-up", "/contact"].includes(request.nextUrl.pathname);
 
   // Redirect logged-in users away from the login and sign-up pages
-  if (isLoggedIn && (isLoginPage || isSignUpPage)) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  // Allow unauthenticated users to access the sign-up page
-  if (!isLoggedIn && isSignUpPage) {
+  if (isLoggedIn && isPublicPage) {
     return NextResponse.next();
   }
 
-  // Redirect unauthenticated users to the login page for other protected routes
-  if (!isLoggedIn && request.nextUrl.pathname !== "/sign-in") {
+  // Allow unauthenticated users to access public pages
+  if (!isLoggedIn && isPublicPage) {
+    return NextResponse.next();
+  }
+
+  // Redirect unauthenticated users to the login page for protected routes
+  if (!isLoggedIn) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 

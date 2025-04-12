@@ -21,7 +21,19 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Decode k8s config
+        run: |
+          echo "${{ secrets.KUBECONFIG_B64 }}" | base64 --decode > kubeconfig
+          export KUBECONFIG=$PWD/kubeconfig
+
       - name: Build and Push Docker image
         run: |
           docker build --build-arg NEXT_PUBLIC_BACKEND_URL=${{ secrets.BACKEND_URL }} -t ${{ secrets.ACR_LOGIN_SERVER }}/ecommerce_frontend:${{ github.sha }} .
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/ecommerce_frontend:${{ github.sha }}
+
+      - name: Deploy to Kubernetes
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG_B64 }}
+        run: |
+          kubectl set image deployment/ecommerce-frontend-deployment frontend=${{ secrets.ACR_LOGIN_SERVER }}/ecommerce_frontend:${{ github.sha }}
+          kubectl rollout status deployment/ecommerce-frontend-deployment

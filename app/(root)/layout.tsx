@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
+import Navbar from "@/components/Navbar";
 
 const roboto_flex = Roboto({
   subsets: ["latin"],
@@ -18,7 +19,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${roboto_flex.className} antialiased`}>{children}</body>
+      <body className={`${roboto_flex.className} antialiased`}>
+        <Navbar loggedIn={true} />
+        {children}
+      </body>
     </html>
   );
 }
