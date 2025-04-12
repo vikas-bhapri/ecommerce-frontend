@@ -10,10 +10,12 @@ const ProductCard = (props: {
   stock: number;
 }) => {
   const { imageUrl, title, description, price, stock } = props;
+  console.log(imageUrl);
   return (
     <div className="flex flex-col md:flex-row items-center min-h-[200px] gap-10  bg-white shadow-md rounded-lg p-4 m-4 border-2 border-gray-200 hover:shadow-lg transition-shadow duration-300">
       <Image
         src={imageUrl || LOGO}
+        priority={true}
         alt="Product Image"
         width={150}
         height={150}

@@ -15,6 +15,7 @@ ARG NEXT_PUBLIC_BACKEND_URL
 ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL
 
 # Build the Next.js app
+COPY next.config.ts ./ 
 RUN npm run build
 
 # Stage 2: Production image
@@ -34,6 +35,7 @@ COPY --from=builder /app/node_modules ./node_modules
 # Copy built app and public files
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.ts ./next.config.ts
 
 # Start the app
 EXPOSE 3000
