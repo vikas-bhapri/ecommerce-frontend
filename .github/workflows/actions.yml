@@ -25,6 +25,8 @@ jobs:
         run: |
           echo "${{ secrets.KUBECONFIG_B64 }}" | base64 --decode > kubeconfig
           export KUBECONFIG=$PWD/kubeconfig
+        env:
+          KUBECONFIG: ${{ github.workspace }}/kubeconfig
 
       - name: Build and Push Docker image
         run: |
@@ -33,7 +35,7 @@ jobs:
 
       - name: Deploy to Kubernetes
         env:
-          KUBECONFIG: ${{ secrets.KUBECONFIG_B64 }}
+          KUBECONFIG: ${{ github.workspace }}/kubeconfig
         run: |
           kubectl set image deployment/ecommerce-frontend-deployment frontend=${{ secrets.ACR_LOGIN_SERVER }}/ecommerce_frontend:${{ github.sha }}
           kubectl rollout status deployment/ecommerce-frontend-deployment
