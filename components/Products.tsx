@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import ProductCard from "./ProductCard";
+import Link from "next/link";
 
 type productType = {
   id: number;
@@ -73,14 +74,16 @@ const Products = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
           {products.map((product: productType) => (
-            <ProductCard
-              key={product.id}
-              imageUrl={product.image_url}
-              title={product.name}
-              description={product.description}
-              price={product.price}
-              stock={product.stock}
-            />
+            <Link key={product.id} href={`/products/${product.id}`}>
+              <ProductCard
+                key={product.id}
+                imageUrl={product.image_url}
+                title={product.name}
+                description={product.description}
+                price={product.price}
+                stock={product.stock}
+              />
+            </Link>
           ))}
         </div>
       )}

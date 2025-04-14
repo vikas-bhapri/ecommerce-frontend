@@ -220,17 +220,8 @@ const AuthForm = ({ method }: { method: formType }) => {
     }
   };
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    if (method === "signIn") {
-      // call signIn function
-      signIn(data);
-      console.log("Sign In", data);
-    } else {
-      signUp(data);
-      // call signUp function
-      console.log("Sign Up", data);
-    }
-  };
+  const onSubmit = (data: z.infer<typeof formSchema>) =>
+    method === "signIn" ? signIn(data) : signUp(data);
 
   return (
     <>
