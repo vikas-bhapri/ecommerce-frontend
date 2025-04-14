@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useParams } from "next/navigation";
+import LOGO from "@/public/globe.svg";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
@@ -19,6 +20,15 @@ type productType = {
   created_at: Date;
   seller_address: string;
   seller_email: string;
+};
+
+type reviewType = {
+  id: number;
+  product_id: number;
+  user_id: number;
+  rating: number;
+  comment: string;
+  created_at: Date;
 };
 
 const ProductDetail = () => {
@@ -50,7 +60,7 @@ const ProductDetail = () => {
     };
 
     product();
-  }, []);
+  }, [productId, backendUrl]);
 
   return (
     <div className="w-4/5 mx-auto mt-5">
@@ -58,11 +68,11 @@ const ProductDetail = () => {
       <div className="flex flex-wrap flex-col md:flex-row justify-center mx-auto mt-5">
         <div className="w-full md:w-1/2 ">
           <Image
-            src={product.image_url}
-            alt={product.name}
+            src={product.image_url || LOGO}
+            alt={product.name || "product logo"}
             width={500}
             height={500}
-            className="w-full object-cover p-2 md:p-6 rounded-md hover:shadow-md"
+            className="w-full object-cover p-2 md:p-6 rounded-md"
           />
         </div>
         <div className="w-full md:w-1/2 p-6">
@@ -84,6 +94,29 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+      <h2 className="text-lg font-semibold mt-6">Seller Information</h2>
+      <p className="mt-2 text-gray-700">Email: {product.seller_email}</p>
+      <p className="mt-2 text-gray-700">Address: {product.seller_address}</p>
+      <h2 className="text-lg font-semibold mt-6">
+        Reviews {product.rating}
+        <span className="text-sm text-gray-600 ml-2">
+          ({product.reviews?.length > 0 ? `(${product.reviews.length})` : 0}{" "}
+          reviews)
+        </span>
+      </h2>
+
+      {product.reviews?.length > 0 ? (
+        <div className="mt-2 text-gray-700">
+          {product.reviews.map((review: reviewType) => (
+            <div key={review.id} className="border-b py-2">
+              <p className="font-semibold">{review.comment}</p>
+              <p className="text-sm text-gray-500">Rating: {review.rating}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-2 text-gray-500">No reviews available.</p>
+      )}
     </div>
   );
 };
