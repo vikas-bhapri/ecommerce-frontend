@@ -58,6 +58,8 @@ const ProductDetail = () => {
   const [rating, setRating] = useState(0);
   const [reviews, setReviews] = useState([] as reviewType[]);
 
+  let reviewsLength = product.reviews?.length || 0;
+
   const form = useForm<z.infer<typeof reviewSchema>>({
     resolver: zodResolver(reviewSchema),
   });
@@ -105,6 +107,7 @@ const ProductDetail = () => {
 
       const newReview = await response.json();
       setReviews((prevReviews) => [newReview, ...prevReviews]);
+      reviewsLength++;
     } catch (error) {
       console.error("Error submitting review:", error);
     }
@@ -175,10 +178,9 @@ const ProductDetail = () => {
       <p className="mt-2 text-gray-700">Email: {product.seller_email}</p>
       <p className="mt-2 text-gray-700">Address: {product.seller_address}</p>
       <h2 className="text-lg font-semibold mt-6">
-        Rating {product.rating}
+        Rating {rating}
         <span className="text-sm text-gray-600 ml-2">
-          ({product.reviews?.length > 0 ? `${product.reviews.length}` : 0}{" "}
-          review(s))
+          ({reviewsLength > 0 ? `${reviewsLength}` : 0} review(s))
         </span>
       </h2>
       <div className="flex gap-3 items-center mb-2">

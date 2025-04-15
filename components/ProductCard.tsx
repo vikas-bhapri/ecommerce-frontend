@@ -12,7 +12,6 @@ const ProductCard = (props: {
   rating: number;
 }) => {
   const { imageUrl, title, description, price, stock, rating } = props;
-  console.log(imageUrl);
   return (
     <div className="flex flex-col md:flex-row items-center min-h-[200px] md:min-w-[400px] gap-10  bg-white shadow-md rounded-lg p-4 m-4 border-2 border-gray-200 hover:shadow-lg transition-shadow duration-300">
       <Image

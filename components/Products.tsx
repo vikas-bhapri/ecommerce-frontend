@@ -37,7 +37,6 @@ const Products = () => {
       });
       const data = await response.json();
       setProducts(data);
-
       // Cache the products in localStorage
       localStorage.setItem("products", JSON.stringify(data));
       localStorage.setItem("productsCacheTime", Date.now().toString());

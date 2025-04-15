@@ -9,6 +9,8 @@ const StarRatingDisplay = ({ rating }: { rating: number }) => {
 
   const stars = [...Array(5).fill(0)];
 
+  rating = Math.round(rating); // Round the rating to the nearest integer
+
   return (
     <div className="flex gap-1">
       {stars.map((_, index) => (
