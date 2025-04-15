@@ -1,6 +1,7 @@
 import Image from "next/image";
 import React from "react";
 import LOGO from "@/public/globe.svg";
+import StarRatingDisplay from "./StarRatingDisplay";
 
 const ProductCard = (props: {
   imageUrl: string;
@@ -8,11 +9,12 @@ const ProductCard = (props: {
   description: string;
   price: number;
   stock: number;
+  rating: number;
 }) => {
-  const { imageUrl, title, description, price, stock } = props;
+  const { imageUrl, title, description, price, stock, rating } = props;
   console.log(imageUrl);
   return (
-    <div className="flex flex-col md:flex-row items-center min-h-[200px] gap-10  bg-white shadow-md rounded-lg p-4 m-4 border-2 border-gray-200 hover:shadow-lg transition-shadow duration-300">
+    <div className="flex flex-col md:flex-row items-center min-h-[200px] md:min-w-[400px] gap-10  bg-white shadow-md rounded-lg p-4 m-4 border-2 border-gray-200 hover:shadow-lg transition-shadow duration-300">
       <Image
         src={imageUrl || LOGO}
         priority={true}
@@ -26,6 +28,10 @@ const ProductCard = (props: {
         <p className="text-gray-700 mb-4">
           {description || "No description available."}
         </p>
+        <div className="flex items-center mb-2">
+          <span className="text-gray-500 mr-2">Rating:</span>
+          <StarRatingDisplay rating={rating} />
+        </div>
         <div className="flex items-center justify-between gap-5 w-full mb-4">
           <span className="font-semibold text-lg">Available: {stock}</span>
           <span className="font-semibold text-lg">Price: ${price}</span>

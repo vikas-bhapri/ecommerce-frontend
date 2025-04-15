@@ -82,6 +82,7 @@ const Products = () => {
                 description={product.description}
                 price={product.price}
                 stock={product.stock}
+                rating={product.rating}
               />
             </Link>
           ))}

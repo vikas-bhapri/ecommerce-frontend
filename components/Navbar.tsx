@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import LOGO from "@/public/globe.svg"; // Adjust the path as necessary
+import LOGO from "@/public/globe.svg";
 import Image from "next/image";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";

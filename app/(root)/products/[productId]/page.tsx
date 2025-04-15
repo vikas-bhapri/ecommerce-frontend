@@ -1,10 +1,27 @@
 "use client";
 
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import Cookies from "js-cookie"; // Import js-cookie
+
 import React from "react";
 import { useParams } from "next/navigation";
 import LOGO from "@/public/globe.svg";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import StarRating from "@/components/StarRatingInput";
+
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import StarRatingDisplay from "@/components/StarRatingDisplay";
 
 type productType = {
   id: number;
@@ -23,19 +40,78 @@ type productType = {
 };
 
 type reviewType = {
-  id: number;
+  id?: number;
   product_id: number;
-  user_id: number;
+  user_id: string;
   rating: number;
   comment: string;
   created_at: Date;
 };
 
+const reviewSchema = z.object({
+  comment: z.string().min(1).max(500),
+});
+
 const ProductDetail = () => {
   const { productId } = useParams();
   const [product, setProduct] = useState({} as productType);
+  const [rating, setRating] = useState(0);
+  const [reviews, setReviews] = useState([] as reviewType[]);
+
+  const form = useForm<z.infer<typeof reviewSchema>>({
+    resolver: zodResolver(reviewSchema),
+  });
+
   const backendUrl =
     process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+
+  const handleRatingChange = (newRating: number) => {
+    setRating(newRating);
+  };
+
+  const handleReviewSubmit = async (data: z.infer<typeof reviewSchema>) => {
+    console.log(data);
+    if (rating === 0) {
+      alert("Please select a rating before submitting your review.");
+      return;
+    }
+
+    try {
+      const token = Cookies.get("token"); // Retrieve the token from cookies
+      if (!token) {
+        console.log(
+          "No token found. User might not be logged in.",
+          document.cookie
+        );
+        return;
+      }
+
+      const response = await fetch(`${backendUrl}/reviews/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Use the token from cookies
+        },
+        body: JSON.stringify({
+          product_id: product.id,
+          rating: rating,
+          comment: data.comment,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const newReview = await response.json();
+      setReviews((prevReviews) => [newReview, ...prevReviews]);
+    } catch (error) {
+      console.error("Error submitting review:", error);
+    }
+
+    setRating(0); // Reset the rating after submission
+    form.reset(); // Reset the form fields
+  };
 
   useEffect(() => {
     const product = async () => {
@@ -53,6 +129,7 @@ const ProductDetail = () => {
 
         const data = await response.json();
         setProduct(data);
+        setReviews(data.reviews || []);
       } catch (error) {
         console.error("Error fetching product:", error);
         return null;
@@ -75,7 +152,7 @@ const ProductDetail = () => {
             className="w-full object-cover p-2 md:p-6 rounded-md"
           />
         </div>
-        <div className="w-full md:w-1/2 p-6">
+        <div className="w-full md:w-1/2 py-6 md:p-6">
           <h2 className="text-lg font-semibold">Product Details</h2>
           <p className="mt-2 text-gray-700">{product.description}</p>
           <div className="mt-4">
@@ -98,19 +175,46 @@ const ProductDetail = () => {
       <p className="mt-2 text-gray-700">Email: {product.seller_email}</p>
       <p className="mt-2 text-gray-700">Address: {product.seller_address}</p>
       <h2 className="text-lg font-semibold mt-6">
-        Reviews {product.rating}
+        Rating {product.rating}
         <span className="text-sm text-gray-600 ml-2">
-          ({product.reviews?.length > 0 ? `(${product.reviews.length})` : 0}{" "}
-          reviews)
+          ({product.reviews?.length > 0 ? `${product.reviews.length}` : 0}{" "}
+          review(s))
         </span>
       </h2>
-
-      {product.reviews?.length > 0 ? (
+      <div className="flex gap-3 items-center mb-2">
+        <h2 className="text-lg font-semibold mt-1">Add a review</h2>
+        <StarRating onRatingChange={handleRatingChange} />
+      </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleReviewSubmit)}>
+          <FormField
+            control={form.control}
+            name="comment"
+            render={({ field }) => (
+              <FormItem className="mb-4">
+                <FormLabel className="text-md">Comment</FormLabel>
+                <FormControl>
+                  <Textarea
+                    className="resize-none"
+                    placeholder="Write your review here..."
+                    {...field}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <Button>Submit</Button>
+        </form>
+      </Form>
+      {reviews?.length > 0 ? (
         <div className="mt-2 text-gray-700">
-          {product.reviews.map((review: reviewType) => (
-            <div key={review.id} className="border-b py-2">
-              <p className="font-semibold">{review.comment}</p>
-              <p className="text-sm text-gray-500">Rating: {review.rating}</p>
+          {reviews.map((review: reviewType, index: number) => (
+            <div key={review.id || index} className="border-b py-2">
+              <div className="flex gap-3 flex-wrap items-center mb-2">
+                <div>{review.user_id}</div>
+                Rating: <StarRatingDisplay rating={review.rating} />
+              </div>
+              <div className="">{review.comment}</div>
             </div>
           ))}
         </div>
