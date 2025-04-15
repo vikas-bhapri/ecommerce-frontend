@@ -23,6 +23,15 @@ import {
 } from "@/components/ui/form";
 import StarRatingDisplay from "@/components/StarRatingDisplay";
 
+type reviewType = {
+  id?: number;
+  product_id: number;
+  user_id: string;
+  rating: number;
+  comment: string;
+  created_at: Date;
+};
+
 type productType = {
   id: number;
   name: string;
@@ -33,19 +42,10 @@ type productType = {
   category: string;
   brand: string;
   rating: number;
-  reviews: [];
+  reviews: reviewType[];
   created_at: Date;
   seller_address: string;
   seller_email: string;
-};
-
-type reviewType = {
-  id?: number;
-  product_id: number;
-  user_id: string;
-  rating: number;
-  comment: string;
-  created_at: Date;
 };
 
 const reviewSchema = z.object({
@@ -58,7 +58,7 @@ const ProductDetail = () => {
   const [rating, setRating] = useState(0);
   const [reviews, setReviews] = useState([] as reviewType[]);
 
-  let reviewsLength = product.reviews?.length || 0;
+  const reviewsLength = reviews.length;
 
   const form = useForm<z.infer<typeof reviewSchema>>({
     resolver: zodResolver(reviewSchema),
@@ -79,12 +79,9 @@ const ProductDetail = () => {
     }
 
     try {
-      const token = Cookies.get("token"); // Retrieve the token from cookies
+      const token = Cookies.get("token");
       if (!token) {
-        console.log(
-          "No token found. User might not be logged in.",
-          document.cookie
-        );
+        console.log("No token found. User might not be logged in.");
         return;
       }
 
@@ -92,7 +89,7 @@ const ProductDetail = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Use the token from cookies
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           product_id: product.id,
@@ -106,14 +103,30 @@ const ProductDetail = () => {
       }
 
       const newReview = await response.json();
+
+      // Update the reviews state
       setReviews((prevReviews) => [newReview, ...prevReviews]);
-      reviewsLength++;
+
+      // Calculate the new average rating
+      const totalReviews = reviews.length + 1; // Include the new review
+      const totalRating =
+        reviews.reduce((sum, review) => sum + review.rating, 0) +
+        newReview.rating;
+      const newAverageRating = parseFloat(
+        (totalRating / totalReviews).toFixed(2)
+      ); // Round to 2 decimal places
+
+      // Update the product state with the new rating
+      setProduct((prevProduct) => ({
+        ...prevProduct,
+        rating: newAverageRating,
+      }));
     } catch (error) {
       console.error("Error submitting review:", error);
     }
 
     setRating(0); // Reset the rating after submission
-    form.reset(); // Reset the form fields
+    form.reset({ comment: "" }); // Reset the form fields to default values
   };
 
   useEffect(() => {
@@ -132,6 +145,7 @@ const ProductDetail = () => {
 
         const data = await response.json();
         setProduct(data);
+        setRating(data.rating || 0);
         setReviews(data.reviews || []);
       } catch (error) {
         console.error("Error fetching product:", error);
@@ -178,14 +192,17 @@ const ProductDetail = () => {
       <p className="mt-2 text-gray-700">Email: {product.seller_email}</p>
       <p className="mt-2 text-gray-700">Address: {product.seller_address}</p>
       <h2 className="text-lg font-semibold mt-6">
-        Rating {rating}
+        Rating {product.rating}
         <span className="text-sm text-gray-600 ml-2">
           ({reviewsLength > 0 ? `${reviewsLength}` : 0} review(s))
         </span>
       </h2>
       <div className="flex gap-3 items-center mb-2">
         <h2 className="text-lg font-semibold mt-1">Add a review</h2>
-        <StarRating onRatingChange={handleRatingChange} />
+        <StarRating
+          onResetRating={rating}
+          onRatingChange={handleRatingChange}
+        />
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleReviewSubmit)}>

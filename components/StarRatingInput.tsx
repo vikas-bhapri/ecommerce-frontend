@@ -3,9 +3,13 @@ import { FaStar } from "react-icons/fa";
 
 interface StarRatingProps {
   onRatingChange: (rating: number) => void;
+  onResetRating?: number; // Optional prop to reset rating
 }
 
-const StarRating: React.FC<StarRatingProps> = ({ onRatingChange }) => {
+const StarRating: React.FC<StarRatingProps> = ({
+  onRatingChange,
+  onResetRating,
+}) => {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState<number | undefined>(undefined);
 
@@ -37,7 +41,11 @@ const StarRating: React.FC<StarRatingProps> = ({ onRatingChange }) => {
         <FaStar
           key={index}
           size={20}
-          color={(hover || rating) > index ? colors.orange : colors.grey}
+          color={
+            (hover || (onResetRating === 0 ? onResetRating : rating)) > index
+              ? colors.orange
+              : colors.grey
+          }
           onClick={() => handleClickStar(index + 1)}
           onMouseOver={() => handleMouseOverStar(index + 1)}
           onMouseLeave={handleMouseLeaveStar}
