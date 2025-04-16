@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import Image from "next/image";
 import React, { useState } from "react";
 import Cookie from "js-cookie";
@@ -68,6 +69,7 @@ const CartItem = ({
     } else {
       onDelete(item.product_id); // Call the onDelete callback when quantity is zero
     }
+
     const response = await fetch(
       `${backendUrl}/cart/?product_id=${item.product_id}`,
       {
