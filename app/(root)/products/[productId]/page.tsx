@@ -13,6 +13,7 @@ import Image from "next/image";
 import StarRating from "@/components/StarRatingInput";
 
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
@@ -69,6 +70,24 @@ const ProductDetail = () => {
 
   const handleRatingChange = (newRating: number) => {
     setRating(newRating);
+  };
+
+  const handleAddToCart = async () => {
+    const response = await fetch(
+      `${backendUrl}/cart/?product_id=${productId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      console.error("Error adding product to cart:", response.statusText);
+      return;
+    }
+    toast.success("Product added to cart successfully!");
   };
 
   const handleReviewSubmit = async (data: z.infer<typeof reviewSchema>) => {
@@ -181,6 +200,7 @@ const ProductDetail = () => {
           <div className="mt-4">
             <button
               type="button"
+              onClick={handleAddToCart}
               className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200 ease-in-out"
             >
               Add to Cart
