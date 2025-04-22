@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import Cookies from "js-cookie"; // Import js-cookie
+// import Cookies from "js-cookie"; // Import js-cookie
 
 import React from "react";
 import { useParams } from "next/navigation";
@@ -73,16 +73,16 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = async () => {
-    const response = await fetch(
-      `${backendUrl}/cart/?product_id=${productId}`,
-      {
+    const response = await fetch("/api/auth/secure-fetch", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        path: `/cart/?product_id=${product.id}`,
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Cookies.get("token")}`,
-        },
-      }
-    );
+      }),
+    });
     if (!response.ok) {
       console.error("Error adding product to cart:", response.statusText);
       return;
@@ -98,22 +98,32 @@ const ProductDetail = () => {
     }
 
     try {
-      const token = Cookies.get("token");
-      if (!token) {
-        console.log("No token found. User might not be logged in.");
-        return;
-      }
+      // const response = await fetch(`${backendUrl}/reviews/`, {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      //   body: JSON.stringify({
+      //     product_id: product.id,
+      //     rating: rating,
+      //     comment: data.comment,
+      //   }),
+      // });
 
-      const response = await fetch(`${backendUrl}/reviews/`, {
+      const response = await fetch("/api/auth/secure-fetch", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          product_id: product.id,
-          rating: rating,
-          comment: data.comment,
+          path: "/reviews/",
+          method: "POST",
+          body: {
+            product_id: product.id,
+            rating: rating,
+            comment: data.comment,
+          },
         }),
       });
 

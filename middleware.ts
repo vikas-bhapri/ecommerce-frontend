@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get("token")?.value;
+  const token = request.cookies.get("refresh_token")?.value;
   const isLoggedIn = !!token;
   const isPublicPage = ["/sign-in", "/sign-up", "/contact"].includes(request.nextUrl.pathname);
 

@@ -11,5 +11,12 @@ export async function POST() {
     sameSite: "strict",
   });
 
+  response.cookies.set("refresh_token", "", {
+    httpOnly: true,
+    path: "/",
+    maxAge: 0, // instantly expires it
+    sameSite: "strict",
+  });
+
   return response;
 }

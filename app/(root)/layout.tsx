@@ -3,6 +3,7 @@ import { Roboto } from "next/font/google";
 import "../globals.css";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "sonner";
+import MobileNav from "@/components/MobileNav";
 
 const roboto_flex = Roboto({
   subsets: ["latin"],
@@ -24,6 +25,7 @@ export default function RootLayout({
         <Navbar loggedIn={true} />
         {children}
         <Toaster />
+        <MobileNav />
       </body>
     </html>
   );

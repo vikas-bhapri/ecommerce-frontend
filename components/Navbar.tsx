@@ -31,7 +31,7 @@ const Navbar = ({ loggedIn }: { loggedIn: boolean }) => {
           </div>
         </Link>
       </div>
-      <div className="flex items-center gap-5">
+      <div className="hidden md:flex items-center gap-5">
         <Link href={"/cart"} className="text-white text-md hover:text-gray-300">
           <div className="flex items-center gap-1">
             <FaCartShopping />

@@ -47,16 +47,16 @@ const CartItem = ({
       quantity: prev.quantity + 1,
       total_price: prev.total_price + prev.price,
     }));
-    const response = await fetch(
-      `${backendUrl}/cart/?product_id=${item.product_id}`,
-      {
+    const response = await fetch("/api/auth/secure-fetch", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Cookie.get("token")}`,
-        },
-      }
-    );
+        path: `/cart/?product_id=${item.product_id}`,
+      }),
+    });
   };
 
   const handleDecrease = async () => {
@@ -70,16 +70,16 @@ const CartItem = ({
       onDelete(item.product_id); // Call the onDelete callback when quantity is zero
     }
 
-    const response = await fetch(
-      `${backendUrl}/cart/?product_id=${item.product_id}`,
-      {
+    const response = await fetch("/api/auth/secure-fetch", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Cookie.get("token")}`,
-        },
-      }
-    );
+        path: `/cart/?product_id=${item.product_id}`,
+      }),
+    });
   };
 
   return (
@@ -93,7 +93,7 @@ const CartItem = ({
             width={100}
             height={100}
           />
-          <div>
+          <div className="">
             <Link href={`/products/${product_id}`}>
               <h3 className="text-lg font-semibold">{name}</h3>
             </Link>
@@ -101,7 +101,7 @@ const CartItem = ({
             <p className="text-gray-600">Price: ${price}</p>
           </div>
         </div>
-        <div className="flex flex-col content-center gap-4">
+        <div className="flex flex-col content-center items-center gap-4">
           <div className="flex items-center justify-center gap-2 border-1 border-gray-500 rounded-md">
             <Button
               type="button"

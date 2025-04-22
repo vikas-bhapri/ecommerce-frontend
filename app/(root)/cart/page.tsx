@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Cookie from "js-cookie";
 import CartItem from "@/components/CartItem";
 
 type cartItem = {
@@ -15,6 +14,7 @@ type cartItem = {
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([] as cartItem[]);
+  const [loading, setLoading] = useState(true);
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   const handleDelete = async (product_id: number) => {
@@ -26,27 +26,28 @@ const CartPage = () => {
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
-        const token = Cookie.get("token");
-        if (!token) {
-          throw new Error("No token found");
-        }
-
-        const response = await fetch(`${backendUrl}/cart/`, {
-          method: "GET",
+        setLoading(true);
+        const response = await fetch("/api/auth/secure-fetch", {
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
+          body: JSON.stringify({
+            path: "/cart",
+            method: "GET",
+          }),
+          credentials: "include",
         });
-
         if (!response.ok) {
-          throw new Error("Failed to fetch cart items");
+          throw new Error("Network response was not ok");
         }
+
         const data = await response.json();
         setCartItems(data.cart_items);
-        console.log(data.cart_items);
       } catch (error) {
         console.error("Error fetching cart items:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -56,6 +57,10 @@ const CartPage = () => {
   return (
     <div className="w-4/5 mx-auto mt-5">
       <h2 className="text-2xl mb-5">My Cart</h2>
+      {loading && <p className="text-center">Loading...</p>}
+      {!loading && cartItems.length === 0 && (
+        <p className="text-center">Your cart is empty.</p>
+      )}
       {cartItems.map((item) => (
         <CartItem
           key={item.product_id}

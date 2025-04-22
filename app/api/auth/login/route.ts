@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
     });
   
     const result = await response.json();
+    const refresh_token: string = response.headers.get("set-cookie")?.split(";")[0]?.split("=")[1] || "";
   
     if (!response.ok) {
       return NextResponse.json({ message: result?.detail?.detail ?? "Login failed" }, { status: 401 });
@@ -28,10 +29,20 @@ export async function POST(req: NextRequest) {
     const res = NextResponse.json({ success: true });
     res.cookies.set("token", result.access_token, {
       path: "/",
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 60 * 30,
       sameSite: "strict",
+      httpOnly: true,
+      secure: true
     });
-  
+
+    res.cookies.set("refresh_token", refresh_token, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30,
+      sameSite: "strict",
+      httpOnly: true,
+      secure: true
+    });
+
     return res;
   }
   
