@@ -10,6 +10,8 @@ export type JWTDecoded = {
 }
 
 export default function verifyJWT(token: string) : JWTDecoded | null {
+    console.log("JWT Secret: ", JWT_SECRET);
+    console.log("JWT Token: ", token);
     try {
         const decoded = jwt.verify(token, JWT_SECRET) as JWTDecoded;
         return decoded;

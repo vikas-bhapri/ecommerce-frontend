@@ -11,15 +11,21 @@ RUN npm ci
 # Copy the rest of the app source code
 COPY . .
 
+# Set build-time environment variables
 ARG NEXT_PUBLIC_BACKEND_URL
-ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL
-
 ARG JWT_SECRET
+
+# Export build args as env vars so Next.js sees them at build time
+ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL
 ENV JWT_SECRET=$JWT_SECRET
 
-# Build the Next.js app
 COPY next.config.ts ./ 
-RUN npm run build
+
+# Next.js uses these at build time
+RUN NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL \
+    JWT_SECRET=$JWT_SECRET \
+    npm run build
+
 
 # Stage 2: Production image
 FROM node:22-alpine AS runner
@@ -30,6 +36,10 @@ WORKDIR /app
 # Set environment variables (adjust based on your use case)
 ENV NODE_ENV=production
 ENV PORT=3000
+
+# Pass JWT_SECRET to the runtime environment
+ARG JWT_SECRET
+ENV JWT_SECRET=$JWT_SECRET
 
 # Install only production dependencies
 COPY --from=builder /app/package.json ./
