@@ -33,7 +33,6 @@ export async function POST(req: NextRequest) {
       maxAge: 60 * 30,
       sameSite: "strict",
       httpOnly: true,
-      secure: true
     });
 
     res.cookies.set("refresh_token", refresh_token, {
@@ -41,7 +40,6 @@ export async function POST(req: NextRequest) {
       maxAge: 60 * 60 * 24 * 30,
       sameSite: "strict",
       httpOnly: true,
-      secure: true
     });
 
     return res;

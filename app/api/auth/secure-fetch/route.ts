@@ -67,7 +67,6 @@ export async function POST(request: NextRequest) {
         path: "/",
         maxAge: 60 * 30, // 30 minutes
         sameSite: "strict",
-        secure: true
         });
     }
     return response;
