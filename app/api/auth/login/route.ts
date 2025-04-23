@@ -21,7 +21,6 @@ export async function POST(req: NextRequest) {
   
     const result = await response.json();
     const refresh_token: string = response.headers.get("set-cookie")?.split(";")[0]?.split("=")[1] || "";
-    console.log(refresh_token);
   
     if (!response.ok) {
       return NextResponse.json({ message: result?.detail?.detail ?? "Login failed" }, { status: 401 });

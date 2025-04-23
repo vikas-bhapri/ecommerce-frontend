@@ -23,17 +23,19 @@ type productType = {
 const Products = () => {
   const [products, setProducts] = useState<productType[]>([]);
   const [loading, setLoading] = useState(false);
-  const backendUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${backendUrl}/products/`, {
-        method: "GET",
+      const response = await fetch("/api/auth/secure-fetch", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          method: "GET",
+          path: `/products/`,
+        }),
       });
       const data = await response.json();
       setProducts(data);
@@ -52,7 +54,7 @@ const Products = () => {
     const cachedProducts = localStorage.getItem("products");
     const cacheTime = localStorage.getItem("productsCacheTime");
 
-    // Cache expiration logic (e.g., 1 hour)
+    // Cache expiration logic (e.g., 1 min)
     const cacheExpiration = 60 * 1000; // 1 min in milliseconds
     const isCacheValid =
       cacheTime && Date.now() - parseInt(cacheTime, 10) < cacheExpiration;
@@ -62,7 +64,6 @@ const Products = () => {
     } else {
       fetchProducts();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

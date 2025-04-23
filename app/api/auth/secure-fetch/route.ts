@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
         newAccessToken = await refresh(refreshToken, request);
     }
 
-    const access_token_payload = verifyJWT(accessToken);
+    const access_token_payload = verifyJWT(accessToken || newAccessToken);
     const refresh_token_payload = verifyJWT(refreshToken);
 
     const body = await request.json();
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         method: body.method,
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${newAccessToken || accessToken}`,
+            "Authorization": `Bearer ${accessToken || newAccessToken}`,
         },
         body: JSON.stringify(body.body),
         credentials: "include",

@@ -1,22 +1,16 @@
-"use client";
-
 import React from "react";
 import LOGO from "@/public/globe.svg";
 import Image from "next/image";
-import { Button } from "./ui/button";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaCartShopping } from "react-icons/fa6";
 
-const Navbar = ({ loggedIn }: { loggedIn: boolean }) => {
-  const router = useRouter();
-  const handleLogout = async () => {
-    await fetch("/api/auth/logout", {
-      method: "POST",
-    });
+import getTokens from "@/utils/auth/getTokens";
+import verifyJWT from "@/utils/auth/verifyJWT";
+import CustomAvatar from "./Avatar";
 
-    router.push("/sign-in");
-  };
+const Navbar = async () => {
+  const { accessToken } = await getTokens();
+  const payload = verifyJWT(accessToken);
 
   return (
     <div className="flex items-center justify-between p-4 bg-gray-800 text-white">
@@ -24,11 +18,6 @@ const Navbar = ({ loggedIn }: { loggedIn: boolean }) => {
         <Image src={LOGO} alt="Logo" className="w-[2rem]" />
         <Link href={"/"}>
           <span className="text-xl font-bold">Anthamma Stores</span>
-        </Link>
-        <Link href={"/contact"}>
-          <div className="text-md mt-1 hover:text-gray-200 hover:no-underline">
-            Contact Us
-          </div>
         </Link>
       </div>
       <div className="hidden md:flex items-center gap-5">
@@ -39,16 +28,9 @@ const Navbar = ({ loggedIn }: { loggedIn: boolean }) => {
           </div>
         </Link>
 
-        {loggedIn && (
-          <Button
-            type="button"
-            onClick={handleLogout}
-            variant="link"
-            className="text-white hover:text-gray-300 hover:no-underline text-md"
-          >
-            Logout
-          </Button>
-        )}
+        <Link href={"/user-profile"}>
+          <CustomAvatar letter={payload?.sub[0].toUpperCase() || "@"} />
+        </Link>
       </div>
     </div>
   );

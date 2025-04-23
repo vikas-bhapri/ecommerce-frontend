@@ -91,26 +91,12 @@ const ProductDetail = () => {
   };
 
   const handleReviewSubmit = async (data: z.infer<typeof reviewSchema>) => {
-    console.log(data);
     if (rating === 0) {
       alert("Please select a rating before submitting your review.");
       return;
     }
 
     try {
-      // const response = await fetch(`${backendUrl}/reviews/`, {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      //   body: JSON.stringify({
-      //     product_id: product.id,
-      //     rating: rating,
-      //     comment: data.comment,
-      //   }),
-      // });
-
       const response = await fetch("/api/auth/secure-fetch", {
         method: "POST",
         headers: {

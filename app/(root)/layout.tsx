@@ -22,10 +22,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${roboto_flex.className} antialiased`}>
-        <Navbar loggedIn={true} />
-        {children}
-        <Toaster />
+        <Navbar />
+        <main className="min-h-screen">{children}</main>
         <MobileNav />
+        <Toaster />
       </body>
     </html>
   );
