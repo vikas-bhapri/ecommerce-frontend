@@ -45,7 +45,9 @@ const ProfileSection = ({ user_id }: { user_id: string }) => {
         <LogOutDialog />
       </Dialog>
 
-      <Button className="bg-red-600 hover:bg-red-800">Delete Account</Button>
+      <Button className="bg-red-600 hover:bg-red-800">
+        Delete Account (WIP)
+      </Button>
     </section>
   );
 };
