@@ -38,12 +38,12 @@ const page = async () => {
           <p className="font-semibold">Email</p>
           <p className="text-lg">{userProfile.email}</p>
           <p className="font-semibold">Address</p>
-          <p className="text-lg">{`${userProfile.address_line_1}, ${userProfile.address_line_2}, ${userProfile.city}-${userProfile.zip_code}, ${userProfile.country}`}</p>
+          <p className="text-lg">{`${userProfile.address_line_1}, ${userProfile.address_line_2}, ${userProfile.city}-${userProfile.zip_code}, ${userProfile.state}, ${userProfile.country}`}</p>
           <p className="font-semibold">Phone</p>
           <p className="text-lg">{`${userProfile.country_code}-${userProfile.phone}`}</p>
         </section>
         <div className="w-full md:w-1/2 lg:w-2/10 mt-5 md:mt-0">
-          <ProfileSection />
+          <ProfileSection user_id={userProfile.email} />
         </div>
       </div>
     </div>
